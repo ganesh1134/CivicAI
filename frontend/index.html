@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivicAI — Smart Civic Issue Reporting</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f6f8f7;--card:#fff;--text:#14231d;--muted:#6b7771;--primary:#168a5b;--primary2:#0f6d48;--line:#e3e9e5;--danger:#e24d4d;--warning:#e59a27;--shadow:0 12px 35px rgba(18,55,40,.08)}
+body{font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.nav{height:72px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 6%;position:sticky;top:0;z-index:20}
+.logo{font-size:23px;font-weight:800;letter-spacing:-.5px;color:var(--primary)}
+.logo span{color:#17362a}
+.navlinks{display:flex;gap:28px;align-items:center}
+.navlinks a{color:#52615a;text-decoration:none;font-size:14px;font-weight:600}
+.navlinks a:hover{color:var(--primary)}
+.btn{border:0;border-radius:10px;padding:11px 18px;font-weight:700;transition:.2s}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary2);transform:translateY(-1px)}
+.btn-light{background:#edf7f1;color:var(--primary)}
+.hero{padding:82px 6% 72px;background:linear-gradient(135deg,#effaf4,#fff 55%,#edf7f2);display:grid;grid-template-columns:1.05fr .95fr;gap:55px;align-items:center}
+.badge{display:inline-flex;background:#e0f4e9;color:var(--primary2);padding:7px 12px;border-radius:30px;font-size:12px;font-weight:800;margin-bottom:20px}
+.hero h1{font-size:56px;line-height:1.04;letter-spacing:-2.4px;max-width:680px}
+.hero h1 em{color:var(--primary);font-style:normal}
+.hero p{color:var(--muted);font-size:18px;max-width:590px;margin:22px 0 28px}
+.hero-actions{display:flex;gap:12px}
+.hero-card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:var(--shadow)}
+.map{height:330px;border-radius:16px;position:relative;overflow:hidden;background:#e9f0ec;background-image:linear-gradient(25deg,transparent 47%,#d3ddd7 48%,#d3ddd7 50%,transparent 51%),linear-gradient(110deg,transparent 47%,#d3ddd7 48%,#d3ddd7 50%,transparent 51%);background-size:95px 95px}
+.road{position:absolute;height:8px;background:#fff;transform:rotate(-18deg);width:130%;left:-10%;top:48%;box-shadow:0 0 0 1px #dbe3de}
+.pin{position:absolute;width:20px;height:20px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--danger);box-shadow:0 3px 12px #d24b4b55}.pin:after{content:'';width:7px;height:7px;background:#fff;border-radius:50%;position:absolute;left:6px;top:6px}
+.pin.p1{left:25%;top:25%}.pin.p2{left:65%;top:33%;background:var(--warning)}.pin.p3{left:45%;top:68%;background:var(--primary)}.pin.p4{left:78%;top:72%;background:var(--danger)}
+.map-label{position:absolute;left:16px;top:15px;background:#fff;padding:8px 11px;border-radius:9px;font-size:12px;font-weight:800;box-shadow:0 4px 15px #0000000d}
+.section{padding:75px 6%}.section-head{text-align:center;margin-bottom:35px}.section-head h2{font-size:34px;letter-spacing:-1px}.section-head p{color:var(--muted);margin-top:8px}
+.features{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.feature{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:0 5px 20px #17362a08}.icon{width:42px;height:42px;border-radius:12px;background:#e8f7ef;display:grid;place-items:center;font-size:21px;margin-bottom:16px}.feature h3{font-size:17px;margin-bottom:7px}.feature p{font-size:13px;color:var(--muted)}
+.app{display:none;padding:35px 6% 80px}.app.active{display:block}.page-title{display:flex;justify-content:space-between;align-items:end;margin-bottom:24px}.page-title h2{font-size:30px}.page-title p{color:var(--muted);font-size:14px}
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:22px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:var(--shadow)}.card h3{font-size:18px;margin-bottom:18px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:13px;font-weight:700}.field input,.field textarea,.field select{border:1px solid #dbe4de;border-radius:9px;padding:11px 12px;outline:none;background:#fbfcfb}.field textarea{min-height:105px;resize:vertical}.field input:focus,.field textarea:focus{border-color:var(--primary)}
+.upload{border:1.5px dashed #b9cfc2;background:#f8fcfa;border-radius:12px;padding:22px;text-align:center;color:var(--muted);font-size:13px}.upload strong{display:block;color:var(--text);margin-bottom:5px}
+.ai-box{background:#f2faf5;border:1px solid #d6eddf;border-radius:13px;padding:18px;margin-top:16px}.ai-title{display:flex;justify-content:space-between;margin-bottom:15px}.ai-title strong{color:var(--primary2)}.ai-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #deebe3;font-size:13px}.ai-row:last-child{border:0}.high{color:var(--danger);font-weight:800}.yes{color:var(--warning);font-weight:800}
+.dashboard{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}.stat small{color:var(--muted);font-size:12px}.stat b{display:block;font-size:28px;margin-top:3px}.stat.red b{color:var(--danger)}.stat.green b{color:var(--primary)}
+.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{text-align:left;padding:13px;border-bottom:1px solid var(--line)}.table th{color:var(--muted);font-size:11px;text-transform:uppercase}.pill{padding:5px 8px;border-radius:20px;font-size:11px;font-weight:800}.pill.red{background:#fdeaea;color:#c63e3e}.pill.orange{background:#fff3df;color:#ad6c0b}.pill.green{background:#e7f7ee;color:#147447}
+.track{display:flex;gap:0;margin:25px 0 10px}.step{flex:1;text-align:center;position:relative;font-size:11px;color:#89958f}.step:before{content:'';display:block;width:28px;height:28px;border-radius:50%;background:#e4ebe7;margin:0 auto 7px;position:relative;z-index:2}.step:after{content:'';position:absolute;height:3px;background:#e4ebe7;top:12px;left:50%;width:100%}.step:last-child:after{display:none}.step.done{color:var(--primary);font-weight:700}.step.done:before{background:var(--primary)}.step.done:after{background:var(--primary)}
+footer{background:#122a20;color:#dce8e2;padding:35px 6%;display:flex;justify-content:space-between;font-size:13px}
+@media(max-width:850px){.hero{grid-template-columns:1fr;padding-top:55px}.hero h1{font-size:43px}.features{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.dashboard{grid-template-columns:1fr 1fr}.navlinks{display:none}}
+@media(max-width:520px){.features,.dashboard,.form-grid{grid-template-columns:1fr}.hero h1{font-size:37px}.section,.hero,.app{padding-left:5%;padding-right:5%}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="logo">Civic<span>AI</span></div>
+  <div class="navlinks">
+    <a href="#" onclick="showPage('home')">Home</a>
+    <a href="#" onclick="showPage('report')">Report Issue</a>
+    <a href="#" onclick="showPage('track')">Track</a>
+    <a href="#" onclick="showPage('authority')">Authority</a>
+  </div>
+  <button class="btn btn-primary" onclick="showPage('report')">Report an Issue</button>
+</nav>
+
+<main id="home">
+<section class="hero">
+  <div>
+    <span class="badge">AI-POWERED CIVIC REPORTING</span>
+    <h1>Turn civic problems into <em>action.</em></h1>
+    <p>Report potholes, garbage, drainage issues and damaged infrastructure. CivicAI uses AI to understand, prioritize and route every report.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="showPage('report')">Report an Issue →</button>
+      <button class="btn btn-light" onclick="showPage('track')">Track a Report</button>
+    </div>
+  </div>
+  <div class="hero-card">
+    <div class="map">
+      <div class="road"></div><div class="map-label">Live Civic Issue Map</div>
+      <i class="pin p1"></i><i class="pin p2"></i><i class="pin p3"></i><i class="pin p4"></i>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="section-head"><h2>One platform. Smarter civic action.</h2><p>From citizen report to authority resolution, AI helps every step.</p></div>
+  <div class="features">
+    <div class="feature"><div class="icon">📷</div><h3>AI Issue Detection</h3><p>Analyze uploaded images and descriptions to identify the civic issue automatically.</p></div>
+    <div class="feature"><div class="icon">♻️</div><h3>Duplicate Detection</h3><p>Find similar reports nearby and group duplicate complaints into one issue.</p></div>
+    <div class="feature"><div class="icon">⚡</div><h3>Smart Prioritization</h3><p>Estimate urgency using severity, location, public impact and report frequency.</p></div>
+    <div class="feature"><div class="icon">📍</div><h3>Live Tracking</h3><p>Citizens can follow their report from submission through resolution.</p></div>
+  </div>
+</section>
+</main>
+
+<section id="report" class="app">
+  <div class="page-title"><div><h2>Report a Civic Issue</h2><p>Give us the details. AI will analyze the report automatically.</p></div></div>
+  <div class="grid">
+    <div class="card">
+      <h3>Issue details</h3>
+      <div class="form-grid">
+        <div class="field full"><label>Upload issue photo</label><div class="upload">📷<strong>Drag & drop or choose a photo</strong>JPG, PNG up to 10MB</div></div>
+        <div class="field"><label>Issue category</label><select id="category"><option>Let AI detect</option><option>Pothole / Road Damage</option><option>Garbage / Waste</option><option>Drainage / Waterlogging</option><option>Streetlight</option><option>Water Leakage</option></select></div>
+        <div class="field"><label>Location</label><input placeholder="Use current location" value="📍 Current location"></div>
+        <div class="field full"><label>Description</label><textarea id="desc" placeholder="Describe what you noticed..."></textarea></div>
+        <div class="field"><label>Nearby landmark</label><input placeholder="e.g. KG Reddy College"></div>
+        <div class="field"><label>Public impact</label><select><option>High — affecting many people</option><option>Medium</option><option>Low</option></select></div>
+      </div>
+      <br><button class="btn btn-primary" onclick="analyze()">Analyze & Submit Report</button>
+    </div>
+    <div class="card">
+      <h3>AI analysis preview</h3>
+      <p style="color:var(--muted);font-size:13px">After submission, CivicAI analyzes the report and prepares it for the right department.</p>
+      <div class="ai-box">
+        <div class="ai-title"><strong>🤖 AI Result</strong><span id="aiStatus">Ready</span></div>
+        <div class="ai-row"><span>Category</span><b id="aiCat">Pothole / Road Damage</b></div>
+        <div class="ai-row"><span>Severity</span><b class="high" id="aiSeverity">High</b></div>
+        <div class="ai-row"><span>Priority score</span><b id="aiScore">87 / 100</b></div>
+        <div class="ai-row"><span>Possible duplicate</span><b class="yes">Yes — 2 nearby</b></div>
+        <div class="ai-row"><span>Assigned department</span><b>Roads & Infrastructure</b></div>
+      </div>
+      <div id="success" style="display:none;margin-top:15px;padding:14px;border-radius:10px;background:#e8f8ef;color:#147447;font-size:13px;font-weight:700">✓ Report submitted successfully. Complaint ID: CIV-2026-1042</div>
+    </div>
+  </div>
+</section>
+
+<section id="track" class="app">
+  <div class="page-title"><div><h2>Track your report</h2><p>See the current status of a civic issue.</p></div></div>
+  <div class="card" style="max-width:900px">
+    <div style="display:flex;gap:10px"><input id="trackId" style="flex:1;border:1px solid #dbe4de;border-radius:9px;padding:12px" placeholder="Enter Complaint ID, e.g. CIV-2026-1042"><button class="btn btn-primary" onclick="track()">Track</button></div>
+    <div id="trackResult" style="margin-top:22px;display:none">
+      <div style="display:flex;justify-content:space-between"><div><b>CIV-2026-1042</b><p style="font-size:13px;color:var(--muted)">Pothole near main road</p></div><span class="pill orange">IN PROGRESS</span></div>
+      <div class="track"><div class="step done">Submitted</div><div class="step done">AI Verified</div><div class="step done">Assigned</div><div class="step">In Progress</div><div class="step">Resolved</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="authority" class="app">
+  <div class="page-title"><div><h2>Authority Dashboard</h2><p>AI-assisted civic issue management and prioritization.</p></div><button class="btn btn-light">Export Report</button></div>
+  <div class="dashboard">
+    <div class="stat"><small>Total Reports</small><b>1,248</b></div>
+    <div class="stat red"><small>Critical Issues</small><b>27</b></div>
+    <div class="stat"><small>Pending</small><b>184</b></div>
+    <div class="stat green"><small>Resolved</small><b>1,037</b></div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>Priority queue</h3>
+      <div class="table-wrap"><table class="table"><thead><tr><th>ID</th><th>Issue</th><th>Priority</th><th>Status</th></tr></thead>
+      <tbody>
+      <tr><td>CIV-1042</td><td>Pothole</td><td><b class="high">91</b></td><td><span class="pill red">Critical</span></td></tr>
+      <tr><td>CIV-1038</td><td>Drainage</td><td><b class="high">88</b></td><td><span class="pill red">Critical</span></td></tr>
+      <tr><td>CIV-1027</td><td>Garbage</td><td><b>76</b></td><td><span class="pill orange">High</span></td></tr>
+      <tr><td>CIV-1019</td><td>Streetlight</td><td><b>64</b></td><td><span class="pill orange">Medium</span></td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="card"><h3>Civic hotspot map</h3><div class="map" style="height:250px"><div class="road"></div><div class="map-label">AI detected hotspots</div><i class="pin p1"></i><i class="pin p2"></i><i class="pin p3"></i></div></div>
+  </div>
+</section>
+
+<footer><div><b>CivicAI</b> — AI-powered civic issue reporting</div><div>Built for Smart City & Public Services</div></footer>
+
+<script>
+function showPage(id){
+  document.querySelectorAll('.app').forEach(x=>x.classList.remove('active'));
+  document.getElementById('home').style.display=id==='home'?'block':'none';
+  if(id!=='home') document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function analyze(){
+  const d=document.getElementById('desc').value.trim();
+  const cat=document.getElementById('category').value;
+  document.getElementById('aiStatus').textContent='Analyzing...';
+  setTimeout(()=>{
+    let detected=cat==='Let AI detect'?(d.toLowerCase().includes('garbage')?'Garbage / Waste':d.toLowerCase().includes('drain')?'Drainage / Waterlogging':'Pothole / Road Damage'):cat;
+    document.getElementById('aiCat').textContent=detected;
+    document.getElementById('aiStatus').textContent='Completed';
+    document.getElementById('success').style.display='block';
+  },700);
+}
+function track(){
+  document.getElementById('trackResult').style.display='block';
+}
+</script>
+</body>
+</html>
