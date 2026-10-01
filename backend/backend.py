@@ -167,7 +167,15 @@ def analyze_image(image_bytes, mime_type, description):
             "confidence": confidence,
             "summary": str(result.get("summary", "Image analyzed."))[:400],
         }
-    except Exception:
+    except Exception as error:
+        error_message = str(error)
+        if api_key:
+            error_message = error_message.replace(api_key, "[redacted]")
+        app.logger.error(
+            "Gemini image analysis failed (%s): %s",
+            type(error).__name__,
+            error_message[:500],
+        )
         return {
             "status": "unavailable",
             "issue_detected": None,
