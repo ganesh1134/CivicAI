@@ -136,7 +136,7 @@ def analyze_image(image_bytes, mime_type, description):
 
         client = genai.Client(api_key=api_key)
         interaction = client.interactions.create(
-            model=os.environ.get("GEMINI_MODEL", "gemini-3.8-flash"),
+            model=os.environ.get("GEMINI_MODEL", "gemini-3.7-flash"),
             input=[
                 {"type": "text", "text": prompt},
                 {
