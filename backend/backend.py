@@ -145,6 +145,29 @@ def analyze_image(image_bytes, mime_type, description):
                     "mime_type": mime_type,
                 },
             ],
+            response_format={
+                "type": "text",
+                "mime_type": "application/json",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "issue_detected": {"type": "boolean"},
+                        "category": {
+                            "type": "string",
+                            "enum": sorted(ISSUE_CATEGORIES | {NO_ISSUE, NEEDS_REVIEW}),
+                        },
+                        "confidence": {"type": "number"},
+                        "summary": {"type": "string"},
+                    },
+                    "required": [
+                        "issue_detected",
+                        "category",
+                        "confidence",
+                        "summary",
+                    ],
+                    "additionalProperties": False,
+                },
+            },
         )
         result = json.loads(interaction.output_text)
         raw_issue_detected = result.get("issue_detected")

@@ -129,7 +129,9 @@ class PhotoUploadTests(unittest.TestCase):
         self.assertFalse(result["issue_detected"])
         self.assertEqual(result["category"], "No issue detected")
         self.assertEqual(result["confidence"], 0.98)
-        client_factory.return_value.interactions.create.assert_called_once()
+        request = client_factory.return_value.interactions.create.call_args.kwargs
+        self.assertEqual(request["response_format"]["mime_type"], "application/json")
+        self.assertIn("issue_detected", request["response_format"]["schema"]["required"])
 
 
 if __name__ == "__main__":
