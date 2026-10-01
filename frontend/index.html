@@ -36,7 +36,7 @@ button{cursor:pointer}
 .app{display:none;padding:35px 6% 80px}.app.active{display:block}.page-title{display:flex;justify-content:space-between;align-items:end;margin-bottom:24px}.page-title h2{font-size:30px}.page-title p{color:var(--muted);font-size:14px}
 .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:22px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:var(--shadow)}.card h3{font-size:18px;margin-bottom:18px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:13px;font-weight:700}.field input,.field textarea,.field select{border:1px solid #dbe4de;border-radius:9px;padding:11px 12px;outline:none;background:#fbfcfb}.field textarea{min-height:105px;resize:vertical}.field input:focus,.field textarea:focus{border-color:var(--primary)}
-.upload{border:1.5px dashed #b9cfc2;background:#f8fcfa;border-radius:12px;padding:22px;text-align:center;color:var(--muted);font-size:13px}.upload strong{display:block;color:var(--text);margin-bottom:5px}
+.upload{display:block;border:1.5px dashed #b9cfc2;background:#f8fcfa;border-radius:12px;padding:22px;text-align:center;color:var(--muted);font-size:13px;cursor:pointer;transition:.2s}.upload strong{display:block;color:var(--text);margin-bottom:5px}.upload:focus-visible,.upload.dragover{outline:2px solid var(--primary);outline-offset:2px;background:#edf8f1}.photo-preview{display:flex;align-items:center;gap:14px;margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:10px}.photo-preview[hidden]{display:none}.photo-preview img{width:72px;height:72px;object-fit:cover;border-radius:8px}.photo-preview strong{display:block;overflow-wrap:anywhere}.photo-error{margin-top:8px;color:var(--danger);font-size:13px}
 .ai-box{background:#f2faf5;border:1px solid #d6eddf;border-radius:13px;padding:18px;margin-top:16px}.ai-title{display:flex;justify-content:space-between;margin-bottom:15px}.ai-title strong{color:var(--primary2)}.ai-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #deebe3;font-size:13px}.ai-row:last-child{border:0}.high{color:var(--danger);font-weight:800}.yes{color:var(--warning);font-weight:800}
 .dashboard{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}.stat small{color:var(--muted);font-size:12px}.stat b{display:block;font-size:28px;margin-top:3px}.stat.red b{color:var(--danger)}.stat.green b{color:var(--primary)}
 .table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{text-align:left;padding:13px;border-bottom:1px solid var(--line)}.table th{color:var(--muted);font-size:11px;text-transform:uppercase}.pill{padding:5px 8px;border-radius:20px;font-size:11px;font-weight:800}.pill.red{background:#fdeaea;color:#c63e3e}.pill.orange{background:#fff3df;color:#ad6c0b}.pill.green{background:#e7f7ee;color:#147447}
@@ -93,27 +93,33 @@ footer{background:#122a20;color:#dce8e2;padding:35px 6%;display:flex;justify-con
     <div class="card">
       <h3>Issue details</h3>
       <div class="form-grid">
-        <div class="field full"><label>Upload issue photo</label><div class="upload">📷<strong>Drag & drop or choose a photo</strong>JPG, PNG up to 10MB</div></div>
+        <div class="field full">
+          <label for="photo">Upload issue photo</label>
+          <label class="upload" id="uploadArea" for="photo" tabindex="0" aria-describedby="photoHelp">📷<strong>Drag & drop or choose a photo</strong><span id="photoHelp">JPG or PNG, up to 10 MB</span></label>
+          <input id="photo" type="file" accept="image/jpeg,image/png" hidden>
+          <div class="photo-preview" id="photoPreview" hidden><img id="photoPreviewImage" alt="Selected issue photo preview"><div><strong id="photoName"></strong><button class="btn btn-light" id="removePhoto" type="button">Remove photo</button></div></div>
+          <p class="photo-error" id="photoError" role="alert" hidden></p>
+        </div>
         <div class="field"><label>Issue category</label><select id="category"><option>Let AI detect</option><option>Pothole / Road Damage</option><option>Garbage / Waste</option><option>Drainage / Waterlogging</option><option>Streetlight</option><option>Water Leakage</option></select></div>
-        <div class="field"><label>Location</label><input placeholder="Use current location" value="📍 Current location"></div>
+        <div class="field"><label for="location">Location</label><input id="location" placeholder="Use current location" value="Current location"></div>
         <div class="field full"><label>Description</label><textarea id="desc" placeholder="Describe what you noticed..."></textarea></div>
-        <div class="field"><label>Nearby landmark</label><input placeholder="e.g. KG Reddy College"></div>
-        <div class="field"><label>Public impact</label><select><option>High — affecting many people</option><option>Medium</option><option>Low</option></select></div>
+        <div class="field"><label for="landmark">Nearby landmark</label><input id="landmark" placeholder="e.g. KG Reddy College"></div>
+        <div class="field"><label for="publicImpact">Public impact</label><select id="publicImpact"><option>High — affecting many people</option><option>Medium</option><option>Low</option></select></div>
       </div>
-      <br><button class="btn btn-primary" onclick="analyze()">Analyze & Submit Report</button>
+      <br><button class="btn btn-primary" id="submitReport" type="button" onclick="analyze()">Analyze & Submit Report</button>
     </div>
     <div class="card">
       <h3>AI analysis preview</h3>
       <p style="color:var(--muted);font-size:13px">After submission, CivicAI analyzes the report and prepares it for the right department.</p>
       <div class="ai-box">
-        <div class="ai-title"><strong>🤖 AI Result</strong><span id="aiStatus">Ready</span></div>
-        <div class="ai-row"><span>Category</span><b id="aiCat">Pothole / Road Damage</b></div>
-        <div class="ai-row"><span>Severity</span><b class="high" id="aiSeverity">High</b></div>
-        <div class="ai-row"><span>Priority score</span><b id="aiScore">87 / 100</b></div>
-        <div class="ai-row"><span>Possible duplicate</span><b class="yes">Yes — 2 nearby</b></div>
-        <div class="ai-row"><span>Assigned department</span><b>Roads & Infrastructure</b></div>
+        <div class="ai-title"><strong>🤖 Issue analysis</strong><span id="aiStatus">Not run</span></div>
+        <div class="ai-row"><span>Finding</span><b id="aiCat">Awaiting report</b></div>
+        <div class="ai-row"><span>Severity</span><b id="aiSeverity">—</b></div>
+        <div class="ai-row"><span>Priority score</span><b id="aiScore">— / 100</b></div>
+        <div class="ai-row"><span>Visual summary</span><b id="aiSummary">Submit a photo to analyze it.</b></div>
+        <div class="ai-row"><span>Assigned department</span><b id="aiDepartment">Not assigned</b></div>
       </div>
-      <div id="success" style="display:none;margin-top:15px;padding:14px;border-radius:10px;background:#e8f8ef;color:#147447;font-size:13px;font-weight:700">✓ Report submitted successfully. Complaint ID: CIV-2026-1042</div>
+      <div id="success" style="display:none;margin-top:15px;padding:14px;border-radius:10px;background:#e8f8ef;color:#147447;font-size:13px;font-weight:700"></div>
     </div>
   </div>
 </section>
@@ -161,16 +167,107 @@ function showPage(id){
   if(id!=='home') document.getElementById(id).classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
 }
-function analyze(){
+
+const photoInput=document.getElementById('photo');
+const uploadArea=document.getElementById('uploadArea');
+const photoPreview=document.getElementById('photoPreview');
+const photoError=document.getElementById('photoError');
+let photoPreviewUrl=null;
+
+function choosePhoto(file){
+  if(!file) return;
+  const extension=file.name.split('.').pop().toLowerCase();
+  const validType=['image/jpeg','image/png'].includes(file.type)||['jpg','jpeg','png'].includes(extension);
+  if(!validType){
+    photoInput.value='';
+    photoError.textContent='Choose a JPG or PNG image.';
+    photoError.hidden=false;
+    return;
+  }
+  if(file.size>10*1024*1024){
+    photoInput.value='';
+    photoError.textContent='The photo must be 10 MB or smaller.';
+    photoError.hidden=false;
+    return;
+  }
+  photoError.hidden=true;
+  if(photoPreviewUrl) URL.revokeObjectURL(photoPreviewUrl);
+  photoPreviewUrl=URL.createObjectURL(file);
+  document.getElementById('photoPreviewImage').src=photoPreviewUrl;
+  document.getElementById('photoName').textContent=file.name;
+  photoPreview.hidden=false;
+}
+
+photoInput.addEventListener('change',()=>choosePhoto(photoInput.files[0]));
+uploadArea.addEventListener('keydown',event=>{
+  if(event.key==='Enter'||event.key===' '){event.preventDefault();photoInput.click();}
+});
+['dragenter','dragover'].forEach(type=>uploadArea.addEventListener(type,event=>{
+  event.preventDefault();
+  uploadArea.classList.add('dragover');
+}));
+['dragleave','drop'].forEach(type=>uploadArea.addEventListener(type,event=>{
+  event.preventDefault();
+  uploadArea.classList.remove('dragover');
+}));
+uploadArea.addEventListener('drop',event=>{
+  const file=event.dataTransfer.files[0];
+  if(!file) return;
+  const transfer=new DataTransfer();
+  transfer.items.add(file);
+  photoInput.files=transfer.files;
+  choosePhoto(file);
+});
+document.getElementById('removePhoto').addEventListener('click',()=>{
+  photoInput.value='';
+  photoPreview.hidden=true;
+  photoError.hidden=true;
+  if(photoPreviewUrl) URL.revokeObjectURL(photoPreviewUrl);
+  photoPreviewUrl=null;
+});
+
+async function analyze(){
   const d=document.getElementById('desc').value.trim();
   const cat=document.getElementById('category').value;
-  document.getElementById('aiStatus').textContent='Analyzing...';
-  setTimeout(()=>{
-    let detected=cat==='Let AI detect'?(d.toLowerCase().includes('garbage')?'Garbage / Waste':d.toLowerCase().includes('drain')?'Drainage / Waterlogging':'Pothole / Road Damage'):cat;
-    document.getElementById('aiCat').textContent=detected;
-    document.getElementById('aiStatus').textContent='Completed';
-    document.getElementById('success').style.display='block';
-  },700);
+  const button=document.getElementById('submitReport');
+  const status=document.getElementById('aiStatus');
+  const success=document.getElementById('success');
+  success.style.display='none';
+  photoError.hidden=true;
+  status.textContent='Submitting...';
+  button.disabled=true;
+
+  const formData=new FormData();
+  formData.append('category',cat);
+  formData.append('description',d);
+  formData.append('location',document.getElementById('location').value.trim());
+  formData.append('landmark',document.getElementById('landmark').value.trim());
+  formData.append('public_impact',document.getElementById('publicImpact').value);
+  if(photoInput.files[0]) formData.append('photo',photoInput.files[0]);
+
+  try{
+    const response=await fetch('/api/report',{method:'POST',body:formData});
+    const result=await response.json().catch(()=>null);
+    if(!response.ok) throw new Error(result?.message||'The report API returned HTTP '+response.status+'.');
+    if(!result?.ai_analysis) throw new Error('The server returned an invalid report response.');
+    const analysis=result.ai_analysis;
+    const statusLabels={complete:'Image analyzed',description_only:'Text only',manual:'Manual category',not_configured:'API key required',unavailable:'AI unavailable',not_analyzed:'Not analyzed'};
+    document.getElementById('aiCat').textContent=analysis.category;
+    document.getElementById('aiSeverity').textContent=analysis.severity;
+    document.getElementById('aiSeverity').className=analysis.severity==='High'?'high':analysis.severity==='Needs review'?'yes':'';
+    document.getElementById('aiScore').textContent=analysis.priority+' / 100';
+    document.getElementById('aiSummary').textContent=analysis.summary;
+    document.getElementById('aiDepartment').textContent=analysis.department;
+    status.textContent=statusLabels[analysis.status]||'Needs review';
+    success.textContent='Report submitted successfully. Complaint ID: '+result.complaint_id;
+    success.style.display='block';
+  }catch(error){
+    status.textContent='Failed';
+    photoError.textContent=error.message==='Failed to fetch'?'Cannot reach the report API. Check that the Flask backend is running and deployed with this website.':error.message||'Could not submit the report. Check the connection and try again.';
+    photoError.hidden=false;
+  }finally{
+    button.disabled=false;
+  }
 }
 function track(){
   document.getElementById('trackResult').style.display='block';
