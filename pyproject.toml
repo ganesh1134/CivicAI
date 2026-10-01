@@ -5,7 +5,7 @@ requires-python = ">=3.11"
 dependencies = [
 	"Flask>=3.0,<4.0",
 	"Flask-Cors>=4.0,<6.0",
-	"google-genai>=1.0,<2.0",
+	"google-genai>=2.0,<3.0",
 ]
 
 [tool.vercel.scripts]
